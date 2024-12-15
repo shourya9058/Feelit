@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="utility.css" />
+    <link rel="icon" href="FavLogo.svg" type="image/x-icon" />
+    <title>Feelit - Music Player you always needed!</title>
+    <!-- <style>
+      /* Apply to the body to make it as background */
+      body {
+        margin: 0;
+        height: 100%; /* Full height of the viewport */
+        background: -moz-linear-gradient(
+          45deg,
+          #02e1ba 0%,
+          #26c9f2 29%,
+          #d911f2 66%,
+          #ffa079 100%
+        );
+        background: -webkit-linear-gradient(
+          45deg,
+          #02e1ba 0%,
+          #26c9f2 29%,
+          #d911f2 66%,
+          #ffa079 100%
+        );
+        background: linear-gradient(
+          45deg,
+          #02e1ba 0%,
+          #26c9f2 29%,
+          #d911f2 66%,
+          #ffa079 100%
+        );
+        background-size: 100% 100%;
+        -webkit-animation: Gradient 15s ease infinite;
+        -moz-animation: Gradient 15s ease infinite;
+        animation: Gradient 15s ease infinite;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Ensure content starts from top */
+        overflow-x: hidden; /* No horizontal scrolling */
+        position: relative;
+      }
+
+      /* Circular morphing effect */
+      /* Circular morphing effect for both blobs */
+      body::before,
+      body::after {
+        content: "";
+        width: 50vmax; /* Size of the blobs */
+        height: 50vmax;
+        position: absolute;
+        background: rgba(255, 255, 255, 0.07);
+        z-index: 2;
+        will-change: border-radius, transform;
+        pointer-events: none;
+      }
+
+      /* First blob */
+      body::before {
+        left: -15vmin;
+        top: -15vmin;
+        animation: morph 15s linear infinite alternate, spin 20s linear infinite; /* Add spin to move */
+        transform-origin: 55% 55%;
+      }
+
+      /* Second blob */
+      body::after {
+        width: 50vmin;
+        height: 50vmin;
+        left: auto;
+        right: -10vmin;
+        bottom: 0;
+        animation: morph 10s linear infinite alternate,
+          spin 26s linear infinite reverse; /* Already has movement */
+        transform-origin: 20% 20%;
+      }
+
+      /* Dark theme: Grey blob */
+      body::before,
+      body::after {
+        background: rgba(128, 128, 128, 0.1); /* Soft gray for dark theme */
+      }
+
+      /* Light theme: Solid blue blob */
+      .light-theme body::before,
+      .light-theme body::after {
+        background-color: #d2e0fb; /* Solid light blue without opacity */
+      }
+
+      /* Circle morphing animation */
+      @keyframes morph {
+        0% {
+          border-radius: 40% 60% 60% 40% / 70% 30% 70% 30%;
+        }
+        100% {
+          border-radius: 40% 60%;
+        }
+      }
+
+      /* Circle spin animation */
+      @keyframes spin {
+        to {
+          transform: rotate(1turn);
+        }
+      }
+
+      /* Ensure there's enough content to trigger scrolling */
+      .scroll-content {
+        min-height: 120vh; /* Ensure content is taller than viewport */
+        padding-bottom: 20px;
+      }
+    </style> -->
+    <style>
+      /* Reset CSS for a clean slate */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%; /* Full height for html and body */
+        overflow-x: hidden; /* Prevent horizontal overflow */
+      }
+
+      /* Light Theme Background Animation */
+      body.light-theme {
+        position: relative;
+        min-height: 100vh; /* Ensure the body has full viewport height */
+      }
+
+      /* Background Style */
+      body.light-theme .background {
+        background: linear-gradient(132deg, #fc415a, #591bc5, #212335);
+        background-size: 400% 400%;
+        animation: Gradient 15s ease infinite;
+        position: fixed; /* Fixed to the viewport */
+        top: 0;
+        left: 0;
+        height: 100%; /* Full height */
+        width: 100%; /* Full width */
+        z-index: 1; /* Ensure background is behind content */
+      }
+
+      /* Cube Styles */
+      body.light-theme .cube {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border: solid 1px #d7d4e4;
+        transform-origin: top left;
+        transform: scale(0) rotate(0deg) translate(-50%, -50%);
+        animation: cube 12s ease-in forwards infinite;
+        z-index: 2; /* Above background but below main content */
+      }
+
+      /* Cube Animation Delay and Positioning */
+      body.light-theme .cube:nth-child(2n) {
+        border-color: #fff;
+      }
+
+      body.light-theme .cube:nth-child(2) {
+        animation-delay: 2s;
+        left: 25vw;
+        top: 40vh;
+      }
+
+      body.light-theme .cube:nth-child(3) {
+        animation-delay: 4s;
+        left: 75vw;
+        top: 50vh;
+      }
+
+      body.light-theme .cube:nth-child(4) {
+        animation-delay: 6s;
+        left: 90vw;
+        top: 10vh;
+      }
+
+      body.light-theme .cube:nth-child(5) {
+        animation-delay: 8s;
+        left: 10vw;
+        top: 85vh;
+      }
+
+      body.light-theme .cube:nth-child(6) {
+        animation-delay: 10s;
+        left: 50vw;
+        top: 10vh;
+      }
+
+      /* Content Layering */
+      .content {
+        position: relative;
+        z-index: 3; /* Ensure content is above the background */
+        padding: 20px; /* General padding for content */
+      }
+
+      .light-theme .left .library,
+      .light-theme .left .home,
+      .light-theme .right .header,
+      .light-theme .right h1,
+      .light-theme .cardContainer {
+        color: white;
+        background: transparent; /* Semi-transparent white background */
+        position: relative;
+        z-index: 3; /* Ensure content is above the background and cubes */
+        border-radius: 8px; /* Optional: round corners for aesthetics */
+      }
+
+      /* Add some padding for the header */
+
+      /* Animate Background */
+      @keyframes Gradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* Animate Cube */
+      @keyframes cube {
+        from {
+          transform: scale(0) rotate(0deg) translate(-50%, -50%);
+          opacity: 1;
+        }
+        to {
+          transform: scale(20) rotate(960deg) translate(-50%, -50%);
+          opacity: 0;
+        }
+      }
+    </style>
+
+    <style>
+      /* Basic Reset */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Make the video fill the entire screen */
+      .video-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        min-width: 100%;
+        min-height: 100%;
+        z-index: 1; /* Behind the content */
+      }
+      .dark-theme .left .library {
+        z-index: 2;
+        background: rgba(0, 0, 0, 0.6);
+      }
+      .dark-theme .left .home {
+        background: rgba(0, 0, 0, 0.6);
+        position: relative;
+        z-index: 2;
+      }
+      .dark-theme .right .header {
+        background: rgba(0, 0, 0, 0.6);
+        position: relative;
+        z-index: 2;
+      }
+      .dark-theme .right h1 {
+        background: rgba(0, 0, 0, 0.6);
+        position: relative;
+        z-index: 2;
+      }
+      .dark-theme .cardContainer {
+        background: rgba(0, 0, 0, 0.6);
+        position: relative;
+        z-index: 2;
+      }
+    </style>
+  </head>
+
+  <body>
+    <video class="video-background" autoplay loop muted>
+      <source src="spacebg.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+    <div class="background">
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+      <div class="cube"></div>
+    </div>
+
+    <div class="container flex">
+      <div class="left">
+        <div class="close">
+          <img width="30" class="invert" src="close.svg" alt="" />
+        </div>
+        <div class="home bg-grey rounded m-1 p-1">
+          <div class="logo">
+            <img width="200" class="invert" src="Feelit.svg" alt="" />
+          </div>
+          <ul>
+            <a href="index.html"
+              ><li><img class="invert" src="home.svg" alt="home" />Home</li></a
+            >
+            <li><img class="invert" src="search.svg" alt="Search" />Search</li>
+          </ul>
+        </div>
+
+        <div class="library bg-grey rounded m-1 p-1">
+          <div class="heading">
+            <img class="invert" src="playlist.svg" alt="" />
+            <h2>Your Library</h2>
+          </div>
+
+          <div class="songList">
+            <ul></ul>
+          </div>
+          <div class="footer">
+            <h1>Follow the Developer!</h1>
+            <div class="follow">
+              <a href="https://www.instagram.com/_shauryasingh__/"
+                ><img src="instagramLogo.svg" alt="Instagram"
+              /></a>
+              <a
+                href="https://www.linkedin.com/in/shaurya-singh007
+              "
+                ><img src="linkedinLogo.svg" alt="LinkedIn"
+              /></a>
+              <a href="https://github.com/shourya9058"
+                ><img src="githubLogo.svg" alt="GitHub"
+              /></a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="right bg-grey rounded">
+        <div class="header">
+          <div class="nav">
+            <div class="hamburgerContainer">
+              <img
+                width="40"
+                class="invert hamburger"
+                src="hamburger.svg"
+                alt=""
+              />
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15 6L9.70711 11.2929C9.37377 11.6262 9.20711 11.7929 9.20711 12C9.20711 12.2071 9.37377 12.3738 9.70711 12.7071L15 18"
+                  stroke="#ffffff"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 18L14.2929 12.7071C14.6262 12.3738 14.7929 12.2071 14.7929 12C14.7929 11.7929 14.6262 11.6262 14.2929 11.2929L9 6"
+                  stroke="#ffffff"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <div class="toggle-container">
+                <button class="toggle-button" onclick="toggleButton()">
+                  <span class="toggle-icon toggle-left"
+                    ><svg
+                      stroke="currentColor"
+                      fill="var(--text-color)"
+                      stroke-width="0"
+                      viewBox="0 0 24 24"
+                      height="18px"
+                      width="18px"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M6.993 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007S14.761 6.993 12 6.993 6.993 9.239 6.993 12zM12 8.993c1.658 0 3.007 1.349 3.007 3.007S13.658 15.007 12 15.007 8.993 13.658 8.993 12 10.342 8.993 12 8.993zM10.998 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2h-3zm17 0h3v2h-3zM4.219 18.363l2.12-2.122 1.415 1.414-2.12 2.122zM16.24 6.344l2.122-2.122 1.414 1.414-2.122 2.122zM6.342 7.759 4.22 5.637l1.415-1.414 2.12 2.122zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z"
+                      ></path></svg
+                  ></span>
+                  <span class="toggle-icon toggle-right"
+                    ><svg
+                      stroke="currentColor"
+                      fill="var(--background-color)"
+                      stroke-width="0"
+                      viewBox="0 0 24 24"
+                      height="18px"
+                      width="18px"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M20.742 13.045a8.088 8.088 0 0 1-2.077.271c-2.135 0-4.14-.83-5.646-2.336a8.025 8.025 0 0 1-2.064-7.723A1 1 0 0 0 9.73 2.034a10.014 10.014 0 0 0-4.489 2.582c-3.898 3.898-3.898 10.243 0 14.143a9.937 9.937 0 0 0 7.072 2.93 9.93 9.93 0 0 0 7.07-2.929 10.007 10.007 0 0 0 2.583-4.491 1.001 1.001 0 0 0-1.224-1.224zm-2.772 4.301a7.947 7.947 0 0 1-5.656 2.343 7.953 7.953 0 0 1-5.658-2.344c-3.118-3.119-3.118-8.195 0-11.314a7.923 7.923 0 0 1 2.06-1.483 10.027 10.027 0 0 0 2.89 7.848 9.972 9.972 0 0 0 7.848 2.891 8.036 8.036 0 0 1-1.484 2.059z"
+                      ></path></svg
+                  ></span>
+                  <span class="toggle-circle"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="buttons">
+            <button class="loginbtn"><a href="index1.html">Log in</a></button>
+          </div>
+        </div>
+        <div class="feelitPlaylists">
+          <h1>Feelit Playlists</h1>
+          <div class="cardContainer">
+            <div data.folder="ncs" class="card">
+              <class class="image-wrapper">
+                <div class="play">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <image
+                      href="hoverSvgFeelit.png"
+                      x="-57"
+                      y="-30"
+                      width="333"
+                      height="332"
+                    />
+                  </svg>
+                </div>
+                <img src="JazzforSleep.png" alt="image" />
+              </class>
+
+              <h2>Jazz for sleep</h2>
+              <p>relaxing jazz music for a peaceful night</p>
+            </div>
+
+            <div data.folder="cs" class="card">
+              <class class="image-wrapper">
+                <div class="play">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <image
+                      href="hoverSvgFeelit.png"
+                      x="-57"
+                      y="-30"
+                      width="333"
+                      height="332"
+                    />
+                  </svg>
+                </div>
+                <img src="Chill Mood.png" alt="image" />
+              </class>
+
+              <h2>Chill Mood</h2>
+              <p>soundtracks for your laid back days</p>
+            </div>
+
+            <div data.folder="ncs2" class="card">
+              <class class="image-wrapper">
+                <div class="play">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <image
+                      href="hoverSvgFeelit.png"
+                      x="-57"
+                      y="-30"
+                      width="333"
+                      height="332"
+                    />
+                  </svg>
+                </div>
+                <img src="HappyHits.png" alt="image" />
+              </class>
+              <h2>Happy Hits</h2>
+              <p>hits to boost your mood and fill you with happiness</p>
+            </div>
+
+            <div data.folder="cs2" class="card">
+              <class class="image-wrapper">
+                <div class="play">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <image
+                      href="hoverSvgFeelit.png"
+                      x="-57"
+                      y="-30"
+                      width="333"
+                      height="332"
+                    />
+                  </svg>
+                </div>
+                <img src="FunkyBeats.png" alt="image" />
+              </class>
+
+              <h2>Funky Beats</h2>
+              <p>your groovy soundtrack for good vibes/p></p>
+            </div>
+
+            <div data.folder="ncs3" class="card">
+              <class class="image-wrapper">
+                <div class="play">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <image
+                      href="hoverSvgFeelit.png"
+                      x="-57"
+                      y="-30"
+                      width="333"
+                      height="332"
+                    />
+                  </svg>
+                </div>
+                <img src="OneDirection.png" alt="image" />
+              </class>
+
+              <h2>This is One Direction</h2>
+              <p>all your favorite hits from the iconic band</p>
+            </div>
+
+            <div data.folder="cs3" class="card">
+              <class class="image-wrapper">
+                <div class="play">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <image
+                      href="hoverSvgFeelit.png"
+                      x="-57"
+                      y="-30"
+                      width="333"
+                      height="332"
+                    />
+                  </svg>
+                </div>
+                <img src="AllOut.png" alt="image" />
+              </class>
+
+              <h2>All Out 2010s</h2>
+              <p>your ultimate throwback to the decade's biggest hits</p>
+            </div>
+
+            <div data.folder="ncs4" class="card">
+              <class class="image-wrapper">
+                <div class="play">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <image
+                      href="hoverSvgFeelit.png"
+                      x="-57"
+                      y="-30"
+                      width="333"
+                      height="332"
+                    />
+                  </svg>
+                </div>
+                <img src="Weeknd.png" alt="image" />
+              </class>
+
+              <h2>The Weeknd Best Songs</h2>
+              <p>a collection of his greatest hits and unforgettable tracks</p>
+            </div>
+
+            <div data.folder="cs4" class="card">
+              <class class="image-wrapper">
+                <div class="play">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <image
+                      href="hoverSvgFeelit.png"
+                      x="-57"
+                      y="-30"
+                      width="333"
+                      height="332"
+                    />
+                  </svg>
+                </div>
+                <img src="Piano.png" alt="image" />
+              </class>
+
+              <h2>Peaceful Piano</h2>
+              <p>soothing melodies for relaxation and focus</p>
+            </div>
+
+            <div data.folder="ncs5" class="card">
+              <class class="image-wrapper">
+                <div class="play">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <image
+                      href="hoverSvgFeelit.png"
+                      x="-57"
+                      y="-30"
+                      width="333"
+                      height="332"
+                    />
+                  </svg>
+                </div>
+                <img src="Jazzinthebg.png" alt="image" />
+              </class>
+
+              <h2>Jazz in the Background</h2>
+              <p>perfect background for your moments</p>
+            </div>
+
+            <div data.folder="cs5" class="card">
+              <class class="image-wrapper">
+                <div class="play">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+                    <image
+                      href="hoverSvgFeelit.png"
+                      x="-57"
+                      y="-30"
+                      width="333"
+                      height="332"
+                    />
+                  </svg>
+                </div>
+                <img src="diljit.png" alt="image" />
+              </class>
+
+              <h2>Diljit Dosanjh Essentials</h2>
+              <p>punjabi beats for every mood</p>
+            </div>
+          </div>
+          <div class="playbar">
+            <div class="seekbar">
+              <div class="circle"></div>
+            </div>
+            <div class="abovebar">
+              <div class="songinfo"></div>
+              <div class="songbuttons">
+                <img
+                  width="35"
+                  id="previous"
+                  src="prevsong.svg"
+                  alt="Previous Song"
+                />
+                <img width="35" id="play" src="play.svg" alt="Play" />
+                <img width="35" id="next" src="nextsong.svg" alt="Next Song" />
+              </div>
+              <div class="timevol">
+                <div class="songtime"></div>
+                <div class="volume">
+                  <img width="25" src="volume.svg" alt="Volume" />
+                  <div class="range">
+                    <input type="range" name="volume" id="volume-control" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
