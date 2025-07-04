@@ -210,10 +210,53 @@ async function displayAlbums() {
                 }
             }
         } else {
-            // Clear all cards from the container
-            const cardContainer = document.querySelector(".cardContainer");
-            if (cardContainer) {
-                cardContainer.innerHTML = '';
+            // Fallback to static cards if dynamic loading fails
+            const albums = [
+                {
+                    folder: 'ncs',
+                    title: 'NCS Releases',
+                    description: 'Best of NoCopyrightSounds',
+                    cover: 'songs/ncs/cover.jpg'
+                },
+                {
+                    folder: 'cs1',
+                    title: 'Chill Mix',
+                    description: 'Relaxing beats',
+                    cover: 'songs/cs1/cover.jpg'
+                },
+                {
+                    folder: 'cs2',
+                    title: 'Workout Mix',
+                    description: 'High energy tracks',
+                    cover: 'songs/cs2/cover.jpg'
+                },
+                {
+                    folder: 'cs3',
+                    title: 'Focus Mix',
+                    description: 'Concentration booster',
+                    cover: 'songs/cs3/cover.jpg'
+                },
+                {
+                    folder: 'cs4',
+                    title: 'Party Mix',
+                    description: 'Dance the night away',
+                    cover: 'songs/cs4/cover.jpg'
+                }
+            ];
+
+            let cardContainer = document.querySelector(".cardContainer");
+            for (let album of albums) {
+                cardContainer.innerHTML += `
+                    <div data-folder="${album.folder}" class="card">
+                        <div class="play">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 20V4L19 12L5 20Z" stroke="#141B34" fill="#000" stroke-width="1.5" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <img src="${album.cover}" alt="${album.title}">
+                        <h2>${album.title}</h2>
+                        <p>${album.description}</p>
+                    </div>`;
             }
         }
         
