@@ -26,7 +26,7 @@ async function getSongs(folder) {
             'City Lights.mp3',
             'Morning Coffee.mp3'
         ];
-        
+
         // Map of song filenames to their metadata including artist and source
         window.songMetadata = {
             'I Want You Close To Me.mp3': 'JARA',
@@ -38,12 +38,12 @@ async function getSongs(folder) {
             'City Lights.mp3': 'Silent Partner',
             'Morning Coffee.mp3': 'The Green Orbs'
         };
-        
+
         // Show all songs, including remote ones
         console.log('All available songs:', songs);
-        
+
         console.log('Loaded songs:', songs);
-        
+
         updateSongList();
     } catch (error) {
         console.error('Error in getSongs:', error);
@@ -80,7 +80,7 @@ function updateSongList() {
     let songUL = document.querySelector(".songList").getElementsByTagName("ul")[0];
     songUL.innerHTML = "";
     for (const song of songs) {
-        const artist = getArtistForSong(song); 
+        const artist = getArtistForSong(song);
         songUL.innerHTML += `
             <li>
                 <img class="invert" width="34" src="music.svg" alt="">
@@ -110,11 +110,11 @@ const playMusic = (track, pause = false) => {
         // Handle both full path and just the filename
         const trackName = track.includes('/') ? track.split('/').pop() : track;
         const songNameWithoutExt = trackName.replace(/\.mp3$/, '');
-        
+
         // Check if the song is available locally
         const localPath = `${currFolder}/${trackName.replace(/ /g, '%20')}`;
         const remoteBaseUrl = 'https://www.soundhelix.com/examples/mp3';
-        
+
         // Map of song names to their remote URLs (using SoundHelix as a source for demo)
         const remoteSongs = {
             'Summer Days': `${remoteBaseUrl}/SoundHelix-Song-1.mp3`,
@@ -123,18 +123,18 @@ const playMusic = (track, pause = false) => {
             'City Lights': `${remoteBaseUrl}/SoundHelix-Song-4.mp3`,
             'Morning Coffee': `${remoteBaseUrl}/SoundHelix-Song-5.mp3`
         };
-        
+
         // Update the song info display
         const songNameElement = document.querySelector(".songinfo");
-        const artistName = getArtistForSong(trackName); 
+        const artistName = getArtistForSong(trackName);
         songNameElement.innerHTML = `
             ${songNameWithoutExt} 
             <br> <span class="artist-info">${artistName}</span>
         `;
-        
+
         // Reset song time display
         document.querySelector(".songtime").innerHTML = "00:00 / 00:00";
-        
+
         // Set the source - try local first, then remote
         if (songs.includes(trackName)) {
             currentSong.src = localPath;
@@ -143,10 +143,10 @@ const playMusic = (track, pause = false) => {
             currentSong.src = remoteSongs[songNameWithoutExt];
             console.log('Playing remote song:', remoteSongs[songNameWithoutExt]);
         }
-        
+
         if (!pause) {
             const playPromise = currentSong.play();
-            
+
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     console.log('Playback started successfully');
@@ -188,7 +188,7 @@ async function displayAlbums() {
             div.innerHTML = text;
             let anchors = div.getElementsByTagName("a");
             let cardContainer = document.querySelector(".cardContainer");
-            
+
             for (let e of anchors) {
                 if (e.href.includes("/songs") && !e.href.includes(".htaccess")) {
                     let folder = e.href.split("/").slice(-2)[0];
@@ -212,36 +212,7 @@ async function displayAlbums() {
         } else {
             // Fallback to static cards if dynamic loading fails
             const albums = [
-                {
-                    folder: 'ncs',
-                    title: 'NCS Releases',
-                    description: 'Best of NoCopyrightSounds',
-                    cover: 'songs/ncs/cover.jpg'
-                },
-                {
-                    folder: 'cs1',
-                    title: 'Chill Mix',
-                    description: 'Relaxing beats',
-                    cover: 'songs/cs1/cover.jpg'
-                },
-                {
-                    folder: 'cs2',
-                    title: 'Workout Mix',
-                    description: 'High energy tracks',
-                    cover: 'songs/cs2/cover.jpg'
-                },
-                {
-                    folder: 'cs3',
-                    title: 'Focus Mix',
-                    description: 'Concentration booster',
-                    cover: 'songs/cs3/cover.jpg'
-                },
-                {
-                    folder: 'cs4',
-                    title: 'Party Mix',
-                    description: 'Dance the night away',
-                    cover: 'songs/cs4/cover.jpg'
-                }
+
             ];
 
             let cardContainer = document.querySelector(".cardContainer");
@@ -259,7 +230,7 @@ async function displayAlbums() {
                     </div>`;
             }
         }
-        
+
         attachAlbumListeners();
     } catch (error) {
         console.error('Error displaying albums:', error);
@@ -271,14 +242,14 @@ function showFlashMessage(message, type = 'info') {
     // Debug: Check current theme
     const isDark = document.body.classList.contains('dark');
     console.log('Current theme:', isDark ? 'dark' : 'light');
-    
+
     // Create message element if it doesn't exist
     let messageEl = document.querySelector('.flash-message');
     if (!messageEl) {
         messageEl = document.createElement('div');
         messageEl.className = 'flash-message';
         document.body.appendChild(messageEl);
-        
+
         // Add CSS for the flash message
         const style = document.createElement('style');
         style.textContent = `
@@ -360,12 +331,12 @@ function showFlashMessage(message, type = 'info') {
             }`;
         document.head.appendChild(style);
     }
-    
+
     // Set message and show
     messageEl.textContent = message;
     messageEl.className = 'flash-message';
     messageEl.classList.add('visible');
-    
+
     // Auto-hide after 3 seconds
     clearTimeout(window.flashMessageTimeout);
     window.flashMessageTimeout = setTimeout(() => {
@@ -382,35 +353,35 @@ function attachAlbumListeners() {
             if (e.target.closest('.play')) {
                 return;
             }
-            
+
             // Get album title
             const albumTitle = card.querySelector('h2')?.textContent || 'this album';
-            
+
             // Get exactly 6 random songs from the main songs list
             const randomSongs = [...songs]
                 .sort(() => 0.5 - Math.random())
                 .slice(0, 6); // Exactly 6 random songs
-            
+
             // Create a temporary playlist for the album
             const tempSongs = [...randomSongs];
             const currentSongs = [...songs]; // Store current songs
-            
+
             // Show flash message
             showFlashMessage(`Now showing songs from ${albumTitle}`);
-            
+
             // Update the UI with the album's songs
             songs = tempSongs;
             updateSongList();
-            
+
             // Scroll to songs section
             document.querySelector('.songs').scrollIntoView({ behavior: 'smooth' });
-            
+
             // Restore the original songs after a short delay to allow for smooth transition
             setTimeout(() => {
                 songs = currentSongs;
             }, 100);
         });
-        
+
         // Add play button functionality
         const playButton = card.querySelector('.play');
         if (playButton) {
@@ -468,40 +439,40 @@ async function main() {
             document.querySelector(".circle").style.left = percent + "%";
             currentSong.currentTime = (currentSong.duration * percent) / 100;
         });
-  
+
         document.querySelector(".hamburger").addEventListener("click", () => {
             document.querySelector(".left").style.left = "0"; // Slide in the left menu
         });
-        
+
         document.querySelector(".close").addEventListener("click", () => {
             document.querySelector(".left").style.left = "-100%"; // Slide out the left menu
         });
-        
-  
+
+
         document.querySelector("#previous").addEventListener("click", () => {
             currentSong.pause();
-            let currentTrack = decodeURI(currentSong.src.split("/").pop()); 
-            let index = songs.indexOf(currentTrack); 
+            let currentTrack = decodeURI(currentSong.src.split("/").pop());
+            let index = songs.indexOf(currentTrack);
             if (index > 0) {
-                playMusic(songs[index - 1]); 
+                playMusic(songs[index - 1]);
             } else {
-                playMusic(songs[songs.length - 1]); 
+                playMusic(songs[songs.length - 1]);
             }
         });
-        
+
         document.querySelector("#next").addEventListener("click", () => {
             currentSong.pause();
-            let currentTrack = decodeURI(currentSong.src.split("/").pop()); 
-            let index = songs.indexOf(currentTrack); 
+            let currentTrack = decodeURI(currentSong.src.split("/").pop());
+            let index = songs.indexOf(currentTrack);
             if (index < songs.length - 1) {
-                playMusic(songs[index + 1]); 
+                playMusic(songs[index + 1]);
             } else {
-                playMusic(songs[0]); 
+                playMusic(songs[0]);
             }
         });
-        
-  
-  
+
+
+
 
         document.querySelector(".range input").addEventListener("change", e => {
             currentSong.volume = parseInt(e.target.value) / 100;
@@ -531,11 +502,11 @@ function toggleButton() {
     const body = document.body;
     const toggleCircle = document.querySelector('.toggle-circle');
 
-    
-    body.classList.toggle('dark-theme');
-    body.classList.toggle('light-theme'); 
 
-    
+    body.classList.toggle('dark-theme');
+    body.classList.toggle('light-theme');
+
+
     if (body.classList.contains('dark-theme')) {
         toggleCircle.style.transform = 'translateX(26px)';
         console.log('Dark theme applied');
@@ -549,15 +520,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggleButton = document.getElementById('theme-toggle');
     const toggleButton = document.querySelector('.toggle-button');
 
-    
+
     const currentTheme = localStorage.getItem('theme') || 'light';
     document.body.classList.add(`${currentTheme}-theme`);
     console.log(`Current theme: ${currentTheme}`);
 
-    
-    
 
-    
+
+
+
     toggleButton.addEventListener('click', () => {
         toggleButton();
         saveThemePreference();
@@ -565,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function saveThemePreference() {
-    
+
     if (document.body.classList.contains('dark-theme')) {
         localStorage.setItem('theme', 'dark');
     } else {
