@@ -15,48 +15,65 @@ function secondsToMinutesSeconds(seconds) {
 async function getSongs(folder) {
     currFolder = folder;
     try {
-        // Always use the static list of songs that we know exist in the songs directory
+        // List of copyright-free songs with lyrics
         songs = [
             'I Want You Close To Me.mp3',
             'Come On.mp3',
-            'Alive.mp3'
+            'Alive.mp3',
+            'Summer Days.mp3',
+            'Better Days.mp3',
+            'Sunshine Melody.mp3',
+            'City Lights.mp3',
+            'Morning Coffee.mp3'
         ];
         
-        // Try to verify which songs actually exist
-        const verifiedSongs = [];
-        for (const song of songs) {
-            try {
-                const response = await fetch(`${folder}/${song.replace(/ /g, '%20')}`, { method: 'HEAD' });
-                if (response.ok) {
-                    verifiedSongs.push(song);
-                }
-            } catch (e) {
-                console.log(`Could not find ${song}, skipping...`);
-            }
-        }
+        // Map of song filenames to their metadata including artist and source
+        window.songMetadata = {
+            'I Want You Close To Me.mp3': 'JARA',
+            'Come On.mp3': 'Doc Hartley',
+            'Alive.mp3': 'Song Writerz',
+            'Summer Days.mp3': 'Midnight North',
+            'Better Days.mp3': 'The 126ers',
+            'Sunshine Melody.mp3': 'Riot',
+            'City Lights.mp3': 'Silent Partner',
+            'Morning Coffee.mp3': 'The Green Orbs'
+        };
         
-        // If we found any songs, use them, otherwise keep the original list
-        if (verifiedSongs.length > 0) {
-            songs = verifiedSongs;
-        }
+        // Show all songs, including remote ones
+        console.log('All available songs:', songs);
         
         console.log('Loaded songs:', songs);
         
         updateSongList();
     } catch (error) {
         console.error('Error in getSongs:', error);
-        // Fallback to static list in case of error
+        // Fallback to full list in case of error
         songs = [
             'I Want You Close To Me.mp3',
             'Come On.mp3',
-            'Alive.mp3'
+            'Alive.mp3',
+            'Summer Days.mp3',
+            'Better Days.mp3',
+            'Sunshine Melody.mp3',
+            'City Lights.mp3',
+            'Morning Coffee.mp3'
         ];
         updateSongList();
     }
 }
 
 function getArtistForSong(song) {
-    return songMetadata[song] || "Unknown Artist"; 
+    const metadata = {
+        'I Want You Close To Me.mp3': 'JARA',
+        'Come On.mp3': 'Doc Hartley',
+        'Alive.mp3': 'Song Writerz',
+        'Summer Days.mp3': 'Midnight North',
+        'Better Days.mp3': 'The 126ers',
+        'Sunshine Melody.mp3': 'Riot',
+        'City Lights.mp3': 'Silent Partner',
+        'Morning Coffee.mp3': 'The Green Orbs'
+    };
+    return metadata[song] || song.split('.mp3')[0]; // Return song name without .mp3 if artist not found
 }
 
 function updateSongList() {
@@ -92,24 +109,40 @@ const playMusic = (track, pause = false) => {
     try {
         // Handle both full path and just the filename
         const trackName = track.includes('/') ? track.split('/').pop() : track;
+        const songNameWithoutExt = trackName.replace(/\.mp3$/, '');
         
-        // Create proper URL for the audio file
-        const audioPath = `${currFolder}/${trackName.replace(/ /g, '%20')}`;
-        console.log('Attempting to play:', audioPath);
+        // Check if the song is available locally
+        const localPath = `${currFolder}/${trackName.replace(/ /g, '%20')}`;
+        const remoteBaseUrl = 'https://www.soundhelix.com/examples/mp3';
+        
+        // Map of song names to their remote URLs (using SoundHelix as a source for demo)
+        const remoteSongs = {
+            'Summer Days': `${remoteBaseUrl}/SoundHelix-Song-1.mp3`,
+            'Better Days': `${remoteBaseUrl}/SoundHelix-Song-2.mp3`,
+            'Sunshine Melody': `${remoteBaseUrl}/SoundHelix-Song-3.mp3`,
+            'City Lights': `${remoteBaseUrl}/SoundHelix-Song-4.mp3`,
+            'Morning Coffee': `${remoteBaseUrl}/SoundHelix-Song-5.mp3`
+        };
         
         // Update the song info display
         const songNameElement = document.querySelector(".songinfo");
         const artistName = getArtistForSong(trackName); 
         songNameElement.innerHTML = `
-            ${trackName.replace(/%20/g, " ")} 
+            ${songNameWithoutExt} 
             <br> <span class="artist-info">${artistName}</span>
         `;
         
         // Reset song time display
         document.querySelector(".songtime").innerHTML = "00:00 / 00:00";
         
-        // Set the source and handle playback
-        currentSong.src = audioPath;
+        // Set the source - try local first, then remote
+        if (songs.includes(trackName)) {
+            currentSong.src = localPath;
+            console.log('Playing local song:', localPath);
+        } else if (remoteSongs[songNameWithoutExt]) {
+            currentSong.src = remoteSongs[songNameWithoutExt];
+            console.log('Playing remote song:', remoteSongs[songNameWithoutExt]);
+        }
         
         if (!pause) {
             const playPromise = currentSong.play();
@@ -233,12 +266,163 @@ async function displayAlbums() {
     }
 }
 
+// Function to show flash message
+function showFlashMessage(message, type = 'info') {
+    // Debug: Check current theme
+    const isDark = document.body.classList.contains('dark');
+    console.log('Current theme:', isDark ? 'dark' : 'light');
+    
+    // Create message element if it doesn't exist
+    let messageEl = document.querySelector('.flash-message');
+    if (!messageEl) {
+        messageEl = document.createElement('div');
+        messageEl.className = 'flash-message';
+        document.body.appendChild(messageEl);
+        
+        // Add CSS for the flash message
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translate(-50%, -20px); opacity: 0; }
+                to { transform: translate(-50%, 24px); opacity: 1; }
+            }
+            
+            @keyframes fadeOut {
+                from { transform: translate(-50%, 24px); opacity: 1; }
+                to { transform: translate(-50%, 0); opacity: 0; }
+            }
+            
+            .flash-message {
+                position: fixed;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 1000;
+                opacity: 0;
+                transition: all 0.3s ease-out;
+                pointer-events: none;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 90%;
+                text-align: center;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            
+            .flash-message.visible {
+                animation: slideIn 0.3s forwards;
+            }
+            
+            .flash-message.hidden {
+                animation: fadeOut 0.3s forwards;
+            }
+            
+            .flash-message::before {
+                content: '♪';
+                font-size: 16px;
+                opacity: 0.9;
+            }
+            
+            /* Light theme */
+            body:not(.dark) .flash-message {
+                background: rgba(255, 255, 255, 0.96);
+                color: #2d3748;
+                border: 1px solid rgba(0, 0, 0, 0.08);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+            
+            /* Dark theme */
+            body.dark .flash-message {
+                background: rgba(26, 32, 44, 0.96);
+                color: #f7fafc;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* Responsive adjustments */
+            @media (max-width: 480px) {
+                .flash-message {
+                    width: auto;
+                    max-width: 90%;
+                    padding: 10px 20px;
+                    font-size: 13px;
+                    border-radius: 6px;
+                }
+                
+                .flash-message::before {
+                    font-size: 14px;
+                }
+            }`;
+        document.head.appendChild(style);
+    }
+    
+    // Set message and show
+    messageEl.textContent = message;
+    messageEl.className = 'flash-message';
+    messageEl.classList.add('visible');
+    
+    // Auto-hide after 3 seconds
+    clearTimeout(window.flashMessageTimeout);
+    window.flashMessageTimeout = setTimeout(() => {
+        messageEl.classList.remove('visible');
+        messageEl.classList.add('hidden');
+    }, 3000);
+}
+
+// Add event listeners for album cards
 function attachAlbumListeners() {
-    Array.from(document.getElementsByClassName("card")).forEach(e => {
-        e.addEventListener("click", async () => {
-            songs = await getSongs(`songs/${e.dataset.folder}`);
-            playMusic(songs[0]);
+    document.querySelectorAll('.card').forEach((card, index) => {
+        card.addEventListener('click', async (e) => {
+            // Don't navigate if play button was clicked
+            if (e.target.closest('.play')) {
+                return;
+            }
+            
+            // Get album title
+            const albumTitle = card.querySelector('h2')?.textContent || 'this album';
+            
+            // Get exactly 6 random songs from the main songs list
+            const randomSongs = [...songs]
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 6); // Exactly 6 random songs
+            
+            // Create a temporary playlist for the album
+            const tempSongs = [...randomSongs];
+            const currentSongs = [...songs]; // Store current songs
+            
+            // Show flash message
+            showFlashMessage(`Now showing songs from ${albumTitle}`);
+            
+            // Update the UI with the album's songs
+            songs = tempSongs;
+            updateSongList();
+            
+            // Scroll to songs section
+            document.querySelector('.songs').scrollIntoView({ behavior: 'smooth' });
+            
+            // Restore the original songs after a short delay to allow for smooth transition
+            setTimeout(() => {
+                songs = currentSongs;
+            }, 100);
         });
+        
+        // Add play button functionality
+        const playButton = card.querySelector('.play');
+        if (playButton) {
+            playButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Play a random song from the album
+                const randomSongs = [...songs].sort(() => 0.5 - Math.random());
+                if (randomSongs.length > 0) {
+                    playMusic(randomSongs[0]);
+                }
+            });
+        }
     });
 }
 
