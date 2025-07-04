@@ -219,12 +219,6 @@ async function displayAlbums() {
                     cover: 'songs/ncs/cover.jpg'
                 },
                 {
-                    folder: 'cs1',
-                    title: 'Chill Mix',
-                    description: 'Relaxing beats',
-                    cover: 'songs/cs1/cover.jpg'
-                },
-                {
                     folder: 'cs2',
                     title: 'Workout Mix',
                     description: 'High energy tracks',
